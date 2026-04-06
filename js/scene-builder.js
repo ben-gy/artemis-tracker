@@ -222,6 +222,37 @@ export function showNoTrajectory() {
     resetCamera();
 }
 
+// Camera pan (translate both camera and target)
+export function panLeft() {
+    if (!camera || !controls) return;
+    const right = new THREE.Vector3();
+    camera.getWorldDirection(right);
+    right.cross(camera.up).normalize();
+    camera.position.addScaledVector(right, -2);
+    controls.target.addScaledVector(right, -2);
+}
+
+export function panRight() {
+    if (!camera || !controls) return;
+    const right = new THREE.Vector3();
+    camera.getWorldDirection(right);
+    right.cross(camera.up).normalize();
+    camera.position.addScaledVector(right, 2);
+    controls.target.addScaledVector(right, 2);
+}
+
+export function panUp() {
+    if (!camera || !controls) return;
+    camera.position.y += 2;
+    controls.target.y += 2;
+}
+
+export function panDown() {
+    if (!camera || !controls) return;
+    camera.position.y -= 2;
+    controls.target.y -= 2;
+}
+
 // Camera manipulation
 export function zoomIn() {
     if (!camera || !controls) return;

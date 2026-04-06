@@ -7,7 +7,7 @@ import { getAllTerms, searchGlossary, lookupTerm } from './glossary.js';
 import { getTelemetry, getTelemetryAt, resetTelemetryCache } from './telemetry-service.js';
 import { interpolateAtDate } from './trajectory-service.js';
 import { getTrajectory } from './trajectory-data.js';
-import { initScene, loadMissionTrajectory, updateSceneAtDate, showNoTrajectory, focusEarth, focusMoon, focusCraft, resetCamera, zoomIn, zoomOut, rotateLeft, rotateRight, tiltUp, tiltDown } from './scene-builder.js';
+import { initScene, loadMissionTrajectory, updateSceneAtDate, showNoTrajectory, focusEarth, focusMoon, focusCraft, resetCamera, zoomIn, zoomOut, rotateLeft, rotateRight, tiltUp, tiltDown, panLeft, panRight, panUp, panDown } from './scene-builder.js';
 import { renderTelemetry, updateMETDisplay, renderTimeline, renderCrew, renderDetails, renderGlossaryList, renderNoTrajectory, hideNoTrajectory, renderStatsBar, renderVideoPanel, renderSpaceWeather, renderDSN, renderSpacecraft } from './components.js';
 import { formatDate, formatDateTime, setTimezone, getTimezone } from './unit-converter.js';
 import { getSpaceWeather } from './space-weather.js';
@@ -546,6 +546,10 @@ function setupEventListeners() {
     document.getElementById('cam-right').addEventListener('click', rotateRight);
     document.getElementById('cam-up').addEventListener('click', tiltUp);
     document.getElementById('cam-down').addEventListener('click', tiltDown);
+    document.getElementById('pan-left').addEventListener('click', panLeft);
+    document.getElementById('pan-right').addEventListener('click', panRight);
+    document.getElementById('pan-up').addEventListener('click', panUp);
+    document.getElementById('pan-down').addEventListener('click', panDown);
 
     // Time slider
     document.getElementById('time-slider').addEventListener('input', onSliderInput);
