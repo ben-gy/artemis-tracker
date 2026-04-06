@@ -222,6 +222,49 @@ export function showNoTrajectory() {
     resetCamera();
 }
 
+// Camera manipulation
+export function zoomIn() {
+    if (!camera || !controls) return;
+    const dir = new THREE.Vector3().subVectors(controls.target, camera.position).normalize();
+    camera.position.addScaledVector(dir, 3);
+}
+
+export function zoomOut() {
+    if (!camera || !controls) return;
+    const dir = new THREE.Vector3().subVectors(controls.target, camera.position).normalize();
+    camera.position.addScaledVector(dir, -3);
+}
+
+export function rotateLeft() {
+    if (!camera || !controls) return;
+    const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+    const angle = 0.15;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const x = offset.x * cos - offset.z * sin;
+    const z = offset.x * sin + offset.z * cos;
+    camera.position.set(controls.target.x + x, camera.position.y, controls.target.z + z);
+}
+
+export function rotateRight() {
+    if (!camera || !controls) return;
+    const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+    const angle = -0.15;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const x = offset.x * cos - offset.z * sin;
+    const z = offset.x * sin + offset.z * cos;
+    camera.position.set(controls.target.x + x, camera.position.y, controls.target.z + z);
+}
+
+export function tiltUp() {
+    if (!camera) return;
+    camera.position.y += 3;
+}
+
+export function tiltDown() {
+    if (!camera) return;
+    camera.position.y -= 3;
+}
+
 // Camera presets
 export function focusEarth() {
     controls.target.set(0, 0, 0);

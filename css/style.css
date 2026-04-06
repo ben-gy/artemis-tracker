@@ -2,6 +2,14 @@
    Artemis Mission Tracker - Styles
    ======================================== */
 
+@font-face {
+    font-family: 'Chicago';
+    src: url('../assets/ChicagoFLF.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --bg-primary: #0a0e17;
     --bg-secondary: #111827;
@@ -79,20 +87,30 @@ body {
     align-items: center;
 }
 
-.header-btn {
+.header-btn, .header-select {
     background: var(--bg-panel);
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
     padding: 6px 12px;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     font-family: var(--font-mono);
     transition: background var(--transition), color var(--transition);
 }
 
-.header-btn:hover {
+.header-btn:hover, .header-select:hover {
     background: var(--bg-panel-header);
+    color: var(--text-primary);
+}
+
+.header-select {
+    outline: none;
+    max-width: 140px;
+}
+
+.header-select option {
+    background: var(--bg-panel);
     color: var(--text-primary);
 }
 
@@ -257,7 +275,12 @@ body {
     bottom: 16px;
     right: 20px;
     display: flex;
-    gap: 6px;
+    gap: 8px;
+}
+
+.scene-btn-group {
+    display: flex;
+    gap: 3px;
 }
 
 .scene-btn {
@@ -284,11 +307,11 @@ body {
    ======================================== */
 
 #panels-container {
-    max-width: 900px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
 
@@ -297,6 +320,10 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     overflow: hidden;
+}
+
+.panel.full-width {
+    grid-column: 1 / -1;
 }
 
 .panel-header {
@@ -1043,6 +1070,109 @@ body {
     background: var(--bg-secondary);
 }
 
+#footer-sources {
+    margin-bottom: 6px;
+}
+
+#footer-sources a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+#footer-sources a:hover {
+    color: var(--accent-cyan);
+    text-decoration: underline;
+}
+
+#footer-credit {
+    margin-top: 4px;
+}
+
+#footer-credit a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+#footer-credit a:hover {
+    color: var(--text-primary);
+}
+
+.chicago-font {
+    font-family: 'Chicago', 'Geneva', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+/* Crew card with images */
+.crew-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.crew-card a {
+    color: var(--accent-cyan);
+    text-decoration: none;
+    font-size: 10px;
+    display: inline-block;
+    margin-top: 6px;
+}
+
+.crew-card a:hover {
+    text-decoration: underline;
+}
+
+/* Spacecraft panel */
+.spacecraft-specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.spacecraft-spec {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 10px;
+}
+
+.spacecraft-spec-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.spacecraft-spec-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.spacecraft-3d {
+    margin-top: 12px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+}
+
+.spacecraft-3d iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
 /* ========================================
    Glossary Modal
    ======================================== */
@@ -1240,6 +1370,7 @@ body {
     #panels-container {
         padding: 12px 14px;
         gap: 10px;
+        grid-template-columns: 1fr;
     }
 
     .panel-content {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artemis Mission Tracker</title>
-    <meta name="description" content="Track NASA's Artemis missions in real-time with 3D trajectory visualization">
+    <meta name="description" content="Track NASA's Artemis missions in real-time with 3D trajectory visualization, live telemetry, and mission timeline">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -14,6 +14,7 @@
             <h1>ARTEMIS TRACKER</h1>
         </div>
         <div class="header-right">
+            <select id="tz-select" class="header-select" title="Timezone"></select>
             <button id="unit-toggle" class="header-btn" title="Toggle units">
                 <span id="unit-label">km</span>
             </button>
@@ -23,7 +24,6 @@
 
     <nav id="mission-tabs" role="tablist"></nav>
 
-    <!-- Quick Stats Bar -->
     <div id="stats-bar"></div>
 
     <main id="app-main">
@@ -34,14 +34,25 @@
                 <span id="scene-status-badge"></span>
             </div>
             <div id="scene-controls">
-                <button id="focus-earth" class="scene-btn" title="Focus Earth">Earth</button>
-                <button id="focus-moon" class="scene-btn" title="Focus Moon">Moon</button>
-                <button id="focus-craft" class="scene-btn" title="Focus Spacecraft">Craft</button>
-                <button id="focus-reset" class="scene-btn" title="Reset View">Reset</button>
+                <div class="scene-btn-group">
+                    <button id="cam-zoom-in" class="scene-btn" title="Zoom In">+</button>
+                    <button id="cam-zoom-out" class="scene-btn" title="Zoom Out">&minus;</button>
+                </div>
+                <div class="scene-btn-group">
+                    <button id="cam-left" class="scene-btn" title="Rotate Left">&larr;</button>
+                    <button id="cam-right" class="scene-btn" title="Rotate Right">&rarr;</button>
+                    <button id="cam-up" class="scene-btn" title="Tilt Up">&uarr;</button>
+                    <button id="cam-down" class="scene-btn" title="Tilt Down">&darr;</button>
+                </div>
+                <div class="scene-btn-group">
+                    <button id="focus-earth" class="scene-btn" title="Focus Earth">Earth</button>
+                    <button id="focus-moon" class="scene-btn" title="Focus Moon">Moon</button>
+                    <button id="focus-craft" class="scene-btn" title="Focus Spacecraft">Craft</button>
+                    <button id="focus-reset" class="scene-btn" title="Reset View">Reset</button>
+                </div>
             </div>
         </section>
 
-        <!-- Time Machine Slider -->
         <section id="time-slider-container">
             <div id="time-slider-row">
                 <button id="time-play-btn" class="time-btn" title="Play/Pause">&#9654;</button>
@@ -58,7 +69,7 @@
         </section>
 
         <section id="panels-container">
-            <div id="telemetry-panel" class="panel" data-panel="telemetry">
+            <div id="telemetry-panel" class="panel full-width" data-panel="telemetry">
                 <div class="panel-header" role="button" tabindex="0">
                     <h2>TELEMETRY</h2>
                     <span class="panel-toggle">&#9660;</span>
@@ -90,7 +101,15 @@
                 <div class="panel-content" id="weather-content"></div>
             </div>
 
-            <div id="crew-panel" class="panel" data-panel="crew">
+            <div id="spacecraft-panel" class="panel" data-panel="spacecraft">
+                <div class="panel-header" role="button" tabindex="0">
+                    <h2>SPACECRAFT</h2>
+                    <span class="panel-toggle">&#9660;</span>
+                </div>
+                <div class="panel-content" id="spacecraft-content"></div>
+            </div>
+
+            <div id="crew-panel" class="panel full-width" data-panel="crew">
                 <div class="panel-header" role="button" tabindex="0">
                     <h2>CREW</h2>
                     <span class="panel-toggle">&#9660;</span>
@@ -117,7 +136,8 @@
     </main>
 
     <footer id="app-footer">
-        <span id="data-attribution"></span>
+        <div id="footer-sources"></div>
+        <div id="footer-credit"></div>
     </footer>
 
     <!-- Glossary Modal -->
@@ -133,7 +153,6 @@
         </div>
     </div>
 
-    <!-- Tooltip container -->
     <div id="tooltip" class="tooltip" hidden></div>
 
     <script type="importmap">

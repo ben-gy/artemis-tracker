@@ -226,14 +226,23 @@ export function renderCrew(container, mission) {
         return;
     }
 
-    const crewHTML = mission.crew.map(member => `
-        <div class="crew-card">
-            <div class="crew-avatar">${member.initials || member.name.split(' ').map(n => n[0]).join('')}</div>
-            <div class="crew-name">${member.name}</div>
-            <div class="crew-role">${member.role}</div>
-            <div class="crew-agency">${member.agency}</div>
-        </div>
-    `).join('');
+    const crewHTML = mission.crew.map(member => {
+        const avatar = member.imageUrl
+            ? `<img src="${member.imageUrl}" alt="${member.name}" loading="lazy" onerror="this.parentElement.textContent='${member.initials}'">`
+            : member.initials;
+        const profileLink = member.profileUrl
+            ? `<a href="${member.profileUrl}" target="_blank" rel="noopener">View Profile &rarr;</a>`
+            : '';
+        return `
+            <div class="crew-card">
+                <div class="crew-avatar">${avatar}</div>
+                <div class="crew-name">${member.name}</div>
+                <div class="crew-role">${member.role}</div>
+                <div class="crew-agency">${member.agency}</div>
+                ${profileLink}
+            </div>
+        `;
+    }).join('');
 
     container.innerHTML = `<div class="crew-grid">${crewHTML}</div>`;
 }
@@ -281,16 +290,17 @@ export function renderVideoPanel(container, mission) {
 
     container.innerHTML = `
         <div class="video-embed-wrapper">
-            <iframe src="https://www.youtube.com/embed/live_stream?channel=UCLA_DiR1FfKNvjuUpBHmylQ"
+            <iframe src="https://www.youtube.com/embed/nA9UZF-SZoQ?autoplay=0"
                     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen loading="lazy"
                     title="NASA TV Live Stream"></iframe>
         </div>
         <div class="video-links">
-            <a href="https://www.nasa.gov/live/" target="_blank" rel="noopener" class="video-link">NASA Live</a>
-            <a href="https://www.nasa.gov/missions/artemis/artemis-2/track-nasas-artemis-ii-mission-in-real-time/" target="_blank" rel="noopener" class="video-link">NASA AROW</a>
+            <a href="https://www.nasa.gov/live/" target="_blank" rel="noopener" class="video-link">NASA Live TV</a>
+            <a href="https://www.nasa.gov/missions/artemis-ii/arow/" target="_blank" rel="noopener" class="video-link">NASA AROW</a>
             <a href="https://www.nasa.gov/blogs/artemis/" target="_blank" rel="noopener" class="video-link">Mission Blog</a>
             <a href="https://www.nasa.gov/artemisaudio/" target="_blank" rel="noopener" class="video-link">Mission Audio</a>
+            <a href="https://www.nasa.gov/missions/artemis/nasas-artemis-ii-moon-mission-daily-agenda/" target="_blank" rel="noopener" class="video-link">Daily Agenda</a>
         </div>
     `;
 }
@@ -375,6 +385,45 @@ export function renderDSN(container, mission) {
     container.innerHTML = `
         <div class="dsn-stations">${stationsHTML}</div>
         <a href="https://eyes.nasa.gov/dsn/dsn.html" target="_blank" rel="noopener" class="dsn-link">View Live DSN Status \u2192</a>
+    `;
+}
+
+// ========================================
+// Spacecraft Stats
+// ========================================
+
+export function renderSpacecraft(container, mission) {
+    const isOrion = true; // All Artemis missions use Orion
+    const vehicle = mission.launchVehicle || 'SLS';
+
+    const specs = [
+        { label: 'Crew Module', value: 'Orion MPCV' },
+        { label: 'Service Module', value: 'ESA ESM' },
+        { label: 'Launch Vehicle', value: vehicle },
+        { label: 'Crew Capacity', value: '4 astronauts' },
+        { label: 'Total Height', value: '98.1 m (322 ft)' },
+        { label: 'Liftoff Thrust', value: '39,144 kN (8.8M lbf)' },
+        { label: 'Heat Shield', value: 'Avcoat ablative' },
+        { label: 'Re-entry Speed', value: '40,000 km/h' },
+        { label: 'Heat Shield Temp', value: '2,760\u00B0C (5,000\u00B0F)' },
+        { label: 'Solar Arrays', value: '4 wings, 11.2 kW' },
+    ];
+
+    const specsHTML = specs.map(s =>
+        `<div class="spacecraft-spec"><div class="spacecraft-spec-label">${s.label}</div><div class="spacecraft-spec-value">${s.value}</div></div>`
+    ).join('');
+
+    container.innerHTML = `
+        <div class="spacecraft-specs">${specsHTML}</div>
+        <div class="spacecraft-3d">
+            <iframe src="https://sketchfab.com/models/d3cfbb9bdf674a6e95288898345541e7/embed?autostart=0&ui_theme=dark&transparent=1"
+                    allow="autoplay; fullscreen; xr-spatial-tracking"
+                    loading="lazy"
+                    title="Orion Spacecraft 3D Model"></iframe>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:var(--text-muted);text-align:center">
+            <a href="https://www.nasa.gov/humans-in-space/orion-spacecraft/" target="_blank" rel="noopener" style="color:var(--accent-cyan);text-decoration:none">NASA Orion Spacecraft &rarr;</a>
+        </div>
     `;
 }
 

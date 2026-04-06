@@ -71,12 +71,19 @@ export function formatMET(launchDate) {
     return prefix + parts.join(' ');
 }
 
+// Global timezone state (set by app.js)
+let _timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+export function setTimezone(tz) { _timezone = tz; }
+export function getTimezone() { return _timezone; }
+
 export function formatDate(date) {
     if (!date) return 'TBD';
     return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
+        timeZone: _timezone,
     });
 }
 
@@ -89,5 +96,6 @@ export function formatDateTime(date) {
         hour: 'numeric',
         minute: '2-digit',
         timeZoneName: 'short',
+        timeZone: _timezone,
     });
 }

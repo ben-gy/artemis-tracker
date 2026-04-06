@@ -7,9 +7,9 @@ import { getAllTerms, searchGlossary, lookupTerm } from './glossary.js';
 import { getTelemetry, getTelemetryAt, resetTelemetryCache } from './telemetry-service.js';
 import { interpolateAtDate } from './trajectory-service.js';
 import { getTrajectory } from './trajectory-data.js';
-import { initScene, loadMissionTrajectory, updateSceneAtDate, showNoTrajectory, focusEarth, focusMoon, focusCraft, resetCamera } from './scene-builder.js';
-import { renderTelemetry, updateMETDisplay, renderTimeline, renderCrew, renderDetails, renderGlossaryList, renderNoTrajectory, hideNoTrajectory, renderStatsBar, renderVideoPanel, renderSpaceWeather, renderDSN } from './components.js';
-import { formatDate, formatDateTime } from './unit-converter.js';
+import { initScene, loadMissionTrajectory, updateSceneAtDate, showNoTrajectory, focusEarth, focusMoon, focusCraft, resetCamera, zoomIn, zoomOut, rotateLeft, rotateRight, tiltUp, tiltDown } from './scene-builder.js';
+import { renderTelemetry, updateMETDisplay, renderTimeline, renderCrew, renderDetails, renderGlossaryList, renderNoTrajectory, hideNoTrajectory, renderStatsBar, renderVideoPanel, renderSpaceWeather, renderDSN, renderSpacecraft } from './components.js';
+import { formatDate, formatDateTime, setTimezone, getTimezone } from './unit-converter.js';
 import { getSpaceWeather } from './space-weather.js';
 
 // ========================================
@@ -38,6 +38,7 @@ let weatherInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     loadPreferences();
+    initTimezoneDropdown();
     renderMissionTabs();
     setupEventListeners();
 
@@ -56,13 +57,46 @@ function loadPreferences() {
             const prefs = JSON.parse(saved);
             useMetric = prefs.metric !== false;
             panelStates = prefs.panels || {};
+            if (prefs.timezone) setTimezone(prefs.timezone);
         } catch (e) { /* ignore */ }
     }
     updateUnitButton();
 }
 
+function initTimezoneDropdown() {
+    const select = document.getElementById('tz-select');
+    const zones = [
+        { label: 'Local', value: Intl.DateTimeFormat().resolvedOptions().timeZone },
+        { label: 'UTC', value: 'UTC' },
+        { label: 'US Eastern', value: 'America/New_York' },
+        { label: 'US Central', value: 'America/Chicago' },
+        { label: 'US Pacific', value: 'America/Los_Angeles' },
+        { label: 'UK (GMT/BST)', value: 'Europe/London' },
+        { label: 'EU Central', value: 'Europe/Berlin' },
+        { label: 'Japan', value: 'Asia/Tokyo' },
+        { label: 'Australia EST', value: 'Australia/Sydney' },
+        { label: 'India', value: 'Asia/Kolkata' },
+    ];
+
+    select.innerHTML = zones.map(z =>
+        `<option value="${z.value}" ${z.value === getTimezone() ? 'selected' : ''}>${z.label}</option>`
+    ).join('');
+
+    select.addEventListener('change', () => {
+        setTimezone(select.value);
+        savePreferences();
+        // Re-render everything with new timezone
+        const mission = getMission(currentMissionId);
+        if (mission) {
+            renderAllPanels(mission);
+            updateAllForDate(mission);
+            updateTimeSliderLabel();
+        }
+    });
+}
+
 function savePreferences() {
-    localStorage.setItem('artemis-prefs', JSON.stringify({ metric: useMetric, panels: panelStates }));
+    localStorage.setItem('artemis-prefs', JSON.stringify({ metric: useMetric, panels: panelStates, timezone: getTimezone() }));
 }
 
 function updateUnitButton() {
@@ -387,6 +421,7 @@ function renderAllPanels(mission) {
     renderDetails(document.getElementById('details-content'), mission, useMetric);
     renderVideoPanel(document.getElementById('video-content'), mission);
     renderDSN(document.getElementById('dsn-content'), mission);
+    renderSpacecraft(document.getElementById('spacecraft-content'), mission);
     renderStatsBar(document.getElementById('stats-bar'), mission, null, useMetric, viewDate);
 
     // Telemetry - show loading for live, or interpolated for historical
@@ -432,10 +467,23 @@ async function loadSpaceWeather() {
 // ========================================
 
 function updateFooter(mission) {
-    const attr = document.getElementById('data-attribution');
-    const sources = ['NASA JPL Horizons', 'NASA DONKI'];
-    if (mission.hasLiveTelemetry) sources.unshift('NASA AROW');
-    attr.textContent = `Data: ${sources.join(' \u00B7 ')} | Trajectory data is approximate`;
+    const sourcesEl = document.getElementById('footer-sources');
+    const creditEl = document.getElementById('footer-credit');
+
+    const sources = [
+        { name: 'NASA AROW', url: 'https://www.nasa.gov/missions/artemis-ii/arow/' },
+        { name: 'JPL Horizons', url: 'https://ssd.jpl.nasa.gov/horizons/' },
+        { name: 'NASA DONKI', url: 'https://ccmc.gsfc.nasa.gov/tools/DONKI/' },
+        { name: 'DSN Now', url: 'https://eyes.nasa.gov/dsn/dsn.html' },
+        { name: 'NASA TV', url: 'https://www.nasa.gov/live/' },
+        { name: 'NASA Artemis', url: 'https://www.nasa.gov/mission/artemis-ii/' },
+    ];
+
+    sourcesEl.innerHTML = 'Data: ' + sources.map(s =>
+        `<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a>`
+    ).join(' \u00B7 ') + ' | Trajectory data is approximate';
+
+    creditEl.innerHTML = 'Built by <a href="https://benrichardson.dev/" target="_blank" rel="noopener" class="chicago-font">benrichardson.dev</a>';
 }
 
 // ========================================
@@ -490,6 +538,14 @@ function setupEventListeners() {
     document.getElementById('focus-moon').addEventListener('click', focusMoon);
     document.getElementById('focus-craft').addEventListener('click', focusCraft);
     document.getElementById('focus-reset').addEventListener('click', resetCamera);
+
+    // Camera controls
+    document.getElementById('cam-zoom-in').addEventListener('click', zoomIn);
+    document.getElementById('cam-zoom-out').addEventListener('click', zoomOut);
+    document.getElementById('cam-left').addEventListener('click', rotateLeft);
+    document.getElementById('cam-right').addEventListener('click', rotateRight);
+    document.getElementById('cam-up').addEventListener('click', tiltUp);
+    document.getElementById('cam-down').addEventListener('click', tiltDown);
 
     // Time slider
     document.getElementById('time-slider').addEventListener('input', onSliderInput);
