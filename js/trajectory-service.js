@@ -1,22 +1,19 @@
 // ========================================
 // Trajectory Service
 // ========================================
-// Interpolation, smoothing, Moon position
+// Interpolation, smoothing, progress tracking
 
 /**
  * Interpolate position at a given date from trajectory waypoints.
- * Uses cubic Hermite interpolation for smooth results.
  */
 export function interpolateAtDate(trajectory, date) {
     if (!trajectory || trajectory.length < 2) return null;
 
     const t = date.getTime();
 
-    // Clamp to trajectory bounds
     if (t <= trajectory[0].timestamp.getTime()) return { ...trajectory[0] };
     if (t >= trajectory[trajectory.length - 1].timestamp.getTime()) return { ...trajectory[trajectory.length - 1] };
 
-    // Find bounding points
     let i = 0;
     for (; i < trajectory.length - 1; i++) {
         if (t >= trajectory[i].timestamp.getTime() && t <= trajectory[i + 1].timestamp.getTime()) break;
@@ -27,9 +24,7 @@ export function interpolateAtDate(trajectory, date) {
     const t0 = p0.timestamp.getTime();
     const t1 = p1.timestamp.getTime();
     const frac = (t - t0) / (t1 - t0);
-
-    // Smooth interpolation using smoothstep
-    const s = frac * frac * (3 - 2 * frac);
+    const s = frac * frac * (3 - 2 * frac); // smoothstep
 
     return {
         timestamp: date,
@@ -49,10 +44,9 @@ function lerp(a, b, t) {
 }
 
 /**
- * Generate smooth 3D path from trajectory waypoints using Catmull-Rom spline.
- * Returns array of {x, y, z} in scene units (km / SCALE_FACTOR).
+ * Generate smooth 3D path using Catmull-Rom spline.
  */
-export function smoothPath(trajectory, segmentsPerSpan = 8) {
+export function smoothPath(trajectory, segmentsPerSpan = 10) {
     if (!trajectory || trajectory.length < 2) return [];
 
     const points = trajectory.map(p => ({ x: p.x, y: p.y, z: p.z }));
@@ -74,10 +68,8 @@ export function smoothPath(trajectory, segmentsPerSpan = 8) {
         }
     }
 
-    // Add final point
     const last = points[points.length - 1];
     result.push({ x: last.x, y: last.y, z: last.z });
-
     return result;
 }
 
@@ -93,47 +85,20 @@ function catmullRom(p0, p1, p2, p3, t) {
 }
 
 /**
- * Compute Moon position in Earth-centered ecliptic coordinates.
- * Simplified Keplerian model - sufficient for visualization.
- */
-export function moonPosition(date) {
-    const MOON_SEMI_MAJOR = 384400; // km
-    const MOON_PERIOD_DAYS = 27.321661;
-    const MOON_INCLINATION = 5.145 * Math.PI / 180; // radians
-
-    // Reference epoch: J2000 (Jan 1, 2000 12:00 TT)
-    const j2000 = new Date('2000-01-01T12:00:00Z').getTime();
-    const daysSinceJ2000 = (date.getTime() - j2000) / 86400000;
-
-    // Mean anomaly (simplified)
-    const meanAnomaly = (2 * Math.PI * daysSinceJ2000 / MOON_PERIOD_DAYS) % (2 * Math.PI);
-
-    // Simplified position (circular orbit approximation)
-    const x = MOON_SEMI_MAJOR * Math.cos(meanAnomaly);
-    const y = MOON_SEMI_MAJOR * Math.sin(meanAnomaly) * Math.cos(MOON_INCLINATION);
-    const z = MOON_SEMI_MAJOR * Math.sin(meanAnomaly) * Math.sin(MOON_INCLINATION);
-
-    return { x, y, z };
-}
-
-/**
- * Find which trajectory segment is "current" based on date.
- * Returns fraction (0-1) of mission completion.
+ * Mission progress (0-1) at a given date.
  */
 export function missionProgress(trajectory, date) {
     if (!trajectory || trajectory.length < 2) return 0;
-
     const t = date.getTime();
     const start = trajectory[0].timestamp.getTime();
     const end = trajectory[trajectory.length - 1].timestamp.getTime();
-
     if (t <= start) return 0;
     if (t >= end) return 1;
     return (t - start) / (end - start);
 }
 
 /**
- * Find the index in the smooth path corresponding to a trajectory fraction.
+ * Index in smooth path at given progress fraction.
  */
 export function pathIndexAtProgress(pathLength, progress) {
     return Math.min(Math.floor(progress * (pathLength - 1)), pathLength - 1);

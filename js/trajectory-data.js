@@ -1,10 +1,18 @@
 // ========================================
 // Pre-calculated Trajectory Data
 // ========================================
-// Coordinates are Earth-centered, ecliptic J2000 (km)
-// Sampled from NASA mission data / JPL Horizons ephemeris
+// All coordinates are relative to Earth center, in km.
+// Moon position is fixed per-mission at the flyby date.
+// Trajectory waypoints are designed so the path visibly loops around the Moon.
 
-// Helper: each point is [hoursFromLaunch, x, y, z, velocityKmS, distFromEarthKm, distFromMoonKm, phase]
+/**
+ * Moon position for each mission (at closest approach date).
+ * These are fixed so the trajectory and Moon are always aligned in the 3D view.
+ */
+export const missionMoonPositions = {
+    'artemis-1': { x: 330000, y: 180000, z: 15000 },   // Nov 21, 2022 (outbound flyby)
+    'artemis-2': { x: 340000, y: 200000, z: 12000 },   // Apr 6, 2026 (lunar flyby)
+};
 
 function buildPoints(launchDate, rawPoints) {
     return rawPoints.map(p => ({
@@ -21,96 +29,121 @@ function buildPoints(launchDate, rawPoints) {
 // ========================================
 // Artemis I Trajectory (Nov 16 - Dec 11, 2022)
 // ========================================
-// Simplified trajectory with key waypoints for smooth interpolation
-// DRO orbit around Moon, total 25.5 days
+// 25.5-day mission: launch -> outbound flyby -> DRO -> return flyby -> splashdown
+// Moon fixed at (330000, 180000, 15000)
+// DRO orbit loops ~70,000 km beyond the Moon
 
-const artemis1Launch = new Date('2022-11-16T06:47:44Z');
+const a1Launch = new Date('2022-11-16T06:47:44Z');
+const MX1 = 330000, MY1 = 180000, MZ1 = 15000; // Moon position for Artemis I
 
 const artemis1Raw = [
-    // [hours, x, y, z, vel km/s, dist earth km, dist moon km, phase]
-    [0,       0, 0, 0,              7.9,    6571,     380000, 'Launch'],
-    [1.5,     4000, 8000, 500,      10.4,   9800,     376000, 'TLI Burn'],
-    [3,       12000, 22000, 1500,   10.8,   25400,    362000, 'Trans-Lunar Coast'],
-    [8,       38000, 58000, 4000,   6.2,    70000,    318000, 'Trans-Lunar Coast'],
-    [16,      68000, 100000, 7000,  3.8,    122000,   268000, 'Trans-Lunar Coast'],
-    [24,      92000, 132000, 9200,  2.9,    163000,   228000, 'Trans-Lunar Coast'],
-    [48,      135000, 190000, 13000, 1.7,   236000,   158000, 'Trans-Lunar Coast'],
-    [72,      168000, 235000, 16000, 1.3,   293000,   103000, 'Trans-Lunar Coast'],
-    [96,      192000, 268000, 18500, 1.1,   337000,   62000,  'Trans-Lunar Coast'],
-    [120,     210000, 292000, 20000, 1.0,   365000,   30000,  'Lunar Approach'],
-    [126,     218000, 298000, 20500, 1.2,   372000,   8000,   'Outbound Powered Flyby'],
-    [130,     225000, 304000, 21000, 1.3,   382000,   12000,  'Post-Flyby'],
-    [140,     240000, 316000, 22000, 0.8,   400000,   35000,  'DRO Transit'],
-    [160,     262000, 334000, 23000, 0.5,   428000,   62000,  'DRO Transit'],
-    [200,     286000, 348000, 24000, 0.3,   454000,   78000,  'DRO'],
-    [227,     292000, 350000, 24200, 0.25,  460000,   72000,  'DRO Insertion'],
-    [260,     295000, 345000, 23800, 0.22,  458000,   68000,  'DRO'],
-    [281,     296000, 340000, 23500, 0.20,  456000,   70000,  'Maximum Distance'],
-    [310,     290000, 332000, 23000, 0.23,  448000,   75000,  'DRO'],
-    [340,     280000, 322000, 22200, 0.27,  432000,   80000,  'DRO'],
-    [375,     265000, 310000, 21000, 0.35,  414000,   68000,  'DRO Departure'],
-    [400,     248000, 296000, 19500, 0.6,   392000,   45000,  'Return Transit'],
-    [430,     230000, 278000, 18000, 0.8,   366000,   22000,  'Return Transit'],
-    [466,     218000, 266000, 16500, 1.3,   350000,   128,    'Return Powered Flyby'],
-    [470,     215000, 260000, 16000, 1.5,   342000,   8000,   'Post-Flyby Return'],
-    [490,     198000, 238000, 14000, 1.5,   314000,   50000,  'Earth Return'],
-    [520,     170000, 205000, 11500, 1.8,   272000,   100000, 'Earth Return'],
-    [550,     138000, 168000, 9000,  2.2,   222000,   155000, 'Earth Return'],
-    [570,     112000, 140000, 7000,  2.8,   182000,   196000, 'Earth Return'],
-    [590,     82000, 106000, 5000,   3.5,   136000,   240000, 'Earth Return'],
-    [600,     62000, 82000, 3800,    4.2,   104000,   270000, 'Earth Return'],
-    [607,     38000, 52000, 2200,    6.5,   65000,    310000, 'Earth Return'],
-    [610,     15000, 22000, 1000,    10.8,  27000,    350000, 'Entry Interface'],
-    [611,     0, 0, 0,               0,     6371,     380000, 'Splashdown'],
+    // [hours, x, y, z, vel, distEarth, distMoon, phase]
+    // Launch & TLI
+    [0,       0, 0, 0,                              7.9,   6571,   380000, 'Launch'],
+    [1.5,     5000, 3000, 500,                       10.4,  6200,   376000, 'TLI Burn'],
+    [6,       25000, 14000, 2000,                    7.5,   29000,  356000, 'Trans-Lunar Coast'],
+    // Outbound coast toward Moon
+    [24,      80000, 45000, 4500,                    2.9,   92000,  290000, 'Trans-Lunar Coast'],
+    [48,      150000, 85000, 8000,                   1.7,   173000, 215000, 'Trans-Lunar Coast'],
+    [72,      220000, 125000, 10500,                 1.3,   254000, 130000, 'Trans-Lunar Coast'],
+    [96,      275000, 155000, 12500,                 1.1,   317000, 70000,  'Trans-Lunar Coast'],
+    [110,     310000, 172000, 14000,                 1.05,  356000, 25000,  'Lunar Approach'],
+    // Outbound powered flyby - swing around Moon's near side
+    [120,     325000, 178000, 14800,                 1.2,   371000, 8000,   'Lunar Approach'],
+    [125,     332000, 182000, 15200,                 1.4,   379000, 3000,   'Outbound Powered Flyby'],
+    [126,     335000, 185000, 15500,                 1.5,   383000, 130,    'Outbound Powered Flyby'],
+    // Pass behind Moon and continue to DRO
+    [128,     340000, 190000, 16000,                 1.3,   391000, 12000,  'Post-Flyby'],
+    [132,     350000, 200000, 17000,                 0.9,   405000, 30000,  'DRO Transit'],
+    [150,     370000, 225000, 20000,                 0.5,   435000, 60000,  'DRO Transit'],
+    // DRO - orbit loops ~70,000km beyond Moon
+    [180,     395000, 245000, 22000,                 0.35,  468000, 85000,  'DRO'],
+    [210,     400000, 250000, 22000,                 0.25,  474000, 90000,  'DRO'],
+    [227,     398000, 248000, 21500,                 0.22,  471000, 88000,  'DRO Insertion'],
+    [260,     390000, 242000, 20000,                 0.25,  461000, 82000,  'DRO'],
+    [281,     385000, 238000, 19000,                 0.22,  455000, 78000,  'Maximum Distance'],
+    // DRO departure - loop back toward Moon
+    [320,     370000, 225000, 17500,                 0.3,   435000, 60000,  'DRO'],
+    [360,     352000, 205000, 16500,                 0.5,   408000, 35000,  'DRO Departure'],
+    [375,     345000, 198000, 16000,                 0.6,   398000, 25000,  'DRO Departure'],
+    // Return powered flyby - swing around Moon again
+    [430,     338000, 188000, 15800,                 0.9,   388000, 12000,  'Return Approach'],
+    [460,     334000, 183000, 15400,                 1.2,   381000, 5000,   'Return Approach'],
+    [466,     332000, 181000, 15100,                 1.5,   379000, 128,    'Return Powered Flyby'],
+    // Post-flyby - heading back to Earth
+    [468,     328000, 177000, 14800,                 1.6,   374000, 6000,   'Post-Flyby Return'],
+    [472,     320000, 170000, 14000,                 1.7,   363000, 18000,  'Earth Return'],
+    [490,     280000, 150000, 12000,                 1.8,   318000, 65000,  'Earth Return'],
+    [520,     220000, 118000, 9500,                  2.2,   250000, 140000, 'Earth Return'],
+    [550,     155000, 82000, 7000,                   2.8,   176000, 220000, 'Earth Return'],
+    [575,     100000, 52000, 4500,                   3.8,   113000, 285000, 'Earth Return'],
+    [595,     50000, 26000, 2200,                    6.0,   56000,  340000, 'Earth Return'],
+    [607,     20000, 10000, 800,                     9.0,   22000,  370000, 'Earth Return'],
+    [610,     5000, 2500, 200,                       10.8,  5600,   378000, 'Entry Interface'],
+    [611,     0, 0, 0,                               0,     6371,   380000, 'Splashdown'],
 ];
 
 // ========================================
 // Artemis II Trajectory (Apr 1 - Apr 11, 2026)
 // ========================================
-// Free-return lunar flyby, 10 days
+// 10-day free-return lunar flyby
+// Moon fixed at (340000, 200000, 12000)
+// Trajectory swings behind the Moon and uses gravity to return
 
-const artemis2Launch = new Date('2026-04-01T22:35:00Z');
+const a2Launch = new Date('2026-04-01T22:35:00Z');
+const MX2 = 340000, MY2 = 200000, MZ2 = 12000; // Moon position for Artemis II
 
 const artemis2Raw = [
-    // [hours, x, y, z, vel km/s, dist earth km, dist moon km, phase]
-    [0,       0, 0, 0,              7.9,    6571,     384400, 'Launch'],
-    [3.4,     5000, 10000, 800,     7.8,    12000,    378000, 'Earth Orbit Ops'],
-    [6,       15000, 28000, 2000,   10.6,   32000,    360000, 'TLI Burn'],
-    [10,      35000, 58000, 4200,   6.8,    69000,    324000, 'Outbound Coast'],
-    [18,      68000, 105000, 7500,  3.6,    127000,   268000, 'Outbound Coast'],
-    [25,      88000, 134000, 9500,  2.7,    163000,   232000, 'Outbound Coast'],
-    [36,      115000, 170000, 12000, 2.0,   208000,   190000, 'Outbound Coast'],
-    [48,      138000, 200000, 14000, 1.6,   246000,   154000, 'Outbound Coast'],
-    [60,      158000, 226000, 15800, 1.3,   280000,   120000, 'Outbound Coast'],
-    [72,      175000, 248000, 17200, 1.1,   308000,   92000,  'Outbound Coast'],
-    [84,      190000, 268000, 18400, 1.0,   334000,   66000,  'Outbound Coast'],
-    [96,      202000, 285000, 19400, 0.9,   355000,   44000,  'Outbound Coast'],
-    [108,     212000, 300000, 20200, 0.9,   372000,   24000,  'Lunar Approach'],
-    [115,     218000, 308000, 20600, 0.95,  382000,   12000,  'Lunar Approach'],
-    [118,     222000, 314000, 20900, 1.05,  388000,   6800,   'Lunar Approach'],
-    [119.2,   224000, 316000, 21000, 1.15,  390000,   6543,   'Communications Blackout'],
-    [120,     225500, 318000, 21100, 1.25,  392000,   6543,   'Lunar Flyby'],
-    [120.5,   226500, 319500, 21150, 1.35,  394000,   7200,   'Maximum Distance'],
-    [122,     230000, 322000, 21200, 1.3,   398000,   14000,  'Post-Flyby'],
-    [126,     236000, 326000, 21000, 1.2,   404000,   28000,  'Return Coast'],
-    [133,     242000, 324000, 20200, 1.1,   406831,   42000,  'Return Coast'],
-    [140,     240000, 316000, 19000, 1.2,   400000,   58000,  'Return Coast'],
-    [150,     232000, 302000, 17200, 1.4,   386000,   82000,  'Return Coast'],
-    [160,     220000, 284000, 15200, 1.6,   365000,   108000, 'Return Coast'],
-    [170,     204000, 262000, 13000, 1.9,   338000,   138000, 'Return Coast'],
-    [180,     184000, 236000, 10800, 2.2,   306000,   170000, 'Return Coast'],
-    [190,     160000, 206000, 8500,  2.6,   266000,   206000, 'Return Coast'],
-    [198,     138000, 178000, 6500,  3.1,   228000,   238000, 'Return Coast'],
-    [204,     118000, 152000, 5000,  3.7,   194000,   266000, 'Return Coast'],
-    [210,     88000, 116000, 3200,   4.8,   148000,   302000, 'Return Coast'],
-    [214,     62000, 84000, 2000,    6.2,   106000,   332000, 'Return Coast'],
-    [216,     40000, 56000, 1200,    8.5,   70000,    358000, 'Return Coast'],
-    [217,     18000, 26000, 500,     10.8,  32000,    376000, 'Entry Interface'],
-    [217.5,   0, 0, 0,              0,     6371,     384400, 'Splashdown'],
+    // [hours, x, y, z, vel, distEarth, distMoon, phase]
+    // Launch & Earth orbit ops
+    [0,       0, 0, 0,                               7.9,   6571,   394000, 'Launch'],
+    [3.4,     6000, 3500, 400,                        7.8,   7000,   390000, 'Earth Orbit Ops'],
+    // TLI burn
+    [6,       18000, 10000, 1500,                     10.6,  21000,  378000, 'TLI Burn'],
+    // Outbound coast - 3 days toward Moon
+    [12,      50000, 28000, 3000,                     5.5,   57000,  345000, 'Outbound Coast'],
+    [24,      95000, 54000, 5000,                     3.2,   110000, 295000, 'Outbound Coast'],
+    [36,      135000, 78000, 6800,                    2.3,   157000, 248000, 'Outbound Coast'],
+    [48,      170000, 98000, 8000,                    1.8,   197000, 210000, 'Outbound Coast'],
+    [60,      200000, 116000, 9000,                   1.5,   232000, 175000, 'Outbound Coast'],
+    [72,      228000, 132000, 9800,                   1.3,   264000, 145000, 'Outbound Coast'],
+    [84,      253000, 148000, 10400,                  1.1,   294000, 115000, 'Outbound Coast'],
+    [96,      276000, 162000, 10800,                  1.0,   322000, 85000,  'Outbound Coast'],
+    [108,     298000, 176000, 11200,                  0.95,  347000, 58000,  'Lunar Approach'],
+    [114,     312000, 184000, 11400,                  0.95,  364000, 38000,  'Lunar Approach'],
+    [117,     322000, 190000, 11600,                  1.0,   375000, 24000,  'Lunar Approach'],
+    // Communications blackout - Moon blocks signals
+    [119,     332000, 196000, 11800,                  1.1,   386000, 10000,  'Communications Blackout'],
+    // Lunar flyby - swing BEHIND the Moon (far side)
+    [119.5,   336000, 198000, 11900,                  1.2,   390000, 7000,   'Lunar Flyby'],
+    [120,     340000, 200000, 12500,                  1.35,  394000, 6543,   'Lunar Flyby'],
+    // Pass behind Moon - trajectory curves around far side
+    [120.3,   343000, 203000, 13500,                  1.4,   398000, 6500,   'Lunar Flyby'],
+    [120.6,   346000, 206000, 14500,                  1.4,   402000, 8000,   'Lunar Flyby'],
+    [121,     348000, 208000, 15500,                  1.35,  406000, 11000,  'Maximum Distance'],
+    // Swing back around - gravity assist redirects toward Earth
+    [121.5,   348000, 210000, 15000,                  1.3,   407000, 14000,  'Post-Flyby'],
+    [122,     347000, 211000, 14000,                  1.3,   406800, 16000,  'Post-Flyby'],
+    [123,     344000, 212000, 13000,                  1.25,  406000, 18000,  'Post-Flyby'],
+    [125,     338000, 212000, 12500,                  1.2,   402000, 14000,  'Return Coast'],
+    // Return coast - 4 days back to Earth
+    [130,     325000, 208000, 12000,                  1.3,   388000, 20000,  'Return Coast'],
+    [140,     300000, 198000, 11500,                  1.5,   360000, 45000,  'Return Coast'],
+    [150,     272000, 185000, 11000,                  1.7,   330000, 78000,  'Return Coast'],
+    [160,     240000, 168000, 10200,                  1.9,   294000, 115000, 'Return Coast'],
+    [170,     205000, 148000, 9200,                   2.2,   254000, 155000, 'Return Coast'],
+    [180,     168000, 125000, 8000,                   2.5,   210000, 200000, 'Return Coast'],
+    [190,     128000, 98000, 6500,                    3.0,   162000, 250000, 'Return Coast'],
+    [200,     88000, 68000, 4800,                     3.8,   112000, 302000, 'Return Coast'],
+    [208,     55000, 42000, 3200,                     5.5,   70000,  340000, 'Return Coast'],
+    [213,     30000, 22000, 1800,                     8.0,   38000,  365000, 'Return Coast'],
+    [216,     12000, 8000, 700,                       10.5,  14500,  383000, 'Entry Interface'],
+    [217,     3000, 2000, 150,                        11.0,  3600,   392000, 'Entry Interface'],
+    [217.5,   0, 0, 0,                               0,     6371,   394000, 'Splashdown'],
 ];
 
-export const artemis1Trajectory = buildPoints(artemis1Launch, artemis1Raw);
-export const artemis2Trajectory = buildPoints(artemis2Launch, artemis2Raw);
+export const artemis1Trajectory = buildPoints(a1Launch, artemis1Raw);
+export const artemis2Trajectory = buildPoints(a2Launch, artemis2Raw);
 
 export function getTrajectory(missionId) {
     switch (missionId) {
@@ -118,4 +151,8 @@ export function getTrajectory(missionId) {
         case 'artemis-2': return artemis2Trajectory;
         default: return null;
     }
+}
+
+export function getMoonPosition(missionId) {
+    return missionMoonPositions[missionId] || null;
 }

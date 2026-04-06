@@ -23,6 +23,9 @@
 
     <nav id="mission-tabs" role="tablist"></nav>
 
+    <!-- Quick Stats Bar -->
+    <div id="stats-bar"></div>
+
     <main id="app-main">
         <section id="scene-container">
             <div id="three-canvas-wrapper"></div>
@@ -38,6 +41,22 @@
             </div>
         </section>
 
+        <!-- Time Machine Slider -->
+        <section id="time-slider-container">
+            <div id="time-slider-row">
+                <button id="time-play-btn" class="time-btn" title="Play/Pause">&#9654;</button>
+                <div id="time-slider-wrapper">
+                    <input type="range" id="time-slider" min="0" max="1000" value="500" step="1">
+                    <div id="time-slider-labels">
+                        <span id="time-slider-start"></span>
+                        <span id="time-slider-current"></span>
+                        <span id="time-slider-end"></span>
+                    </div>
+                </div>
+                <button id="time-live-btn" class="time-btn time-live" title="Jump to live">LIVE</button>
+            </div>
+        </section>
+
         <section id="panels-container">
             <div id="telemetry-panel" class="panel" data-panel="telemetry">
                 <div class="panel-header" role="button" tabindex="0">
@@ -45,6 +64,14 @@
                     <span class="panel-toggle">&#9660;</span>
                 </div>
                 <div class="panel-content" id="telemetry-content"></div>
+            </div>
+
+            <div id="video-panel" class="panel" data-panel="video">
+                <div class="panel-header" role="button" tabindex="0">
+                    <h2>NASA LIVE</h2>
+                    <span class="panel-toggle">&#9660;</span>
+                </div>
+                <div class="panel-content" id="video-content"></div>
             </div>
 
             <div id="timeline-panel" class="panel" data-panel="timeline">
@@ -55,12 +82,28 @@
                 <div class="panel-content" id="timeline-content"></div>
             </div>
 
+            <div id="weather-panel" class="panel" data-panel="weather">
+                <div class="panel-header" role="button" tabindex="0">
+                    <h2>SPACE WEATHER</h2>
+                    <span class="panel-toggle">&#9660;</span>
+                </div>
+                <div class="panel-content" id="weather-content"></div>
+            </div>
+
             <div id="crew-panel" class="panel" data-panel="crew">
                 <div class="panel-header" role="button" tabindex="0">
                     <h2>CREW</h2>
                     <span class="panel-toggle">&#9660;</span>
                 </div>
                 <div class="panel-content" id="crew-content"></div>
+            </div>
+
+            <div id="dsn-panel" class="panel" data-panel="dsn">
+                <div class="panel-header" role="button" tabindex="0">
+                    <h2>DEEP SPACE NETWORK</h2>
+                    <span class="panel-toggle">&#9660;</span>
+                </div>
+                <div class="panel-content" id="dsn-content"></div>
             </div>
 
             <div id="details-panel" class="panel" data-panel="details">

@@ -662,6 +662,349 @@ body {
 }
 
 /* ========================================
+   Stats Bar
+   ======================================== */
+
+#stats-bar {
+    display: flex;
+    gap: 2px;
+    padding: 0 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+#stats-bar:empty {
+    display: none;
+}
+
+#stats-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    white-space: nowrap;
+    font-size: 11px;
+    color: var(--text-secondary);
+    border-right: 1px solid var(--border-color);
+}
+
+.stat-chip:last-child {
+    border-right: none;
+}
+
+.stat-chip-label {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-size: 9px;
+}
+
+.stat-chip-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 12px;
+}
+
+.stat-chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ========================================
+   Time Machine Slider
+   ======================================== */
+
+#time-slider-container {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 10px 20px;
+}
+
+#time-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.time-btn {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    flex-shrink: 0;
+}
+
+.time-btn:hover {
+    background: var(--bg-panel-header);
+    color: var(--text-primary);
+}
+
+.time-btn.time-live {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    width: auto;
+    padding: 0 10px;
+    color: var(--status-live);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.time-btn.time-live.active {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: var(--status-live);
+}
+
+.time-btn.time-live:hover {
+    background: rgba(245, 158, 11, 0.2);
+}
+
+#time-slider-wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
+#time-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--bg-primary);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+#time-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    border: 2px solid var(--text-primary);
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+#time-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+#time-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    border: 2px solid var(--text-primary);
+    cursor: pointer;
+}
+
+#time-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+#time-slider-current {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* ========================================
+   Video Panel
+   ======================================== */
+
+.video-embed-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+}
+
+.video-embed-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: var(--radius-md);
+}
+
+.video-links {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.video-link {
+    font-size: 11px;
+    color: var(--accent-cyan);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+}
+
+.video-link:hover {
+    background: var(--bg-panel-header);
+    border-color: var(--accent-cyan);
+}
+
+/* ========================================
+   Space Weather Panel
+   ======================================== */
+
+.weather-summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.weather-risk-indicator {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.weather-risk-info h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.weather-risk-info p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.weather-events {
+    list-style: none;
+}
+
+.weather-event {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.weather-event:last-child {
+    border-bottom: none;
+}
+
+.weather-event-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+}
+
+/* ========================================
+   DSN Panel
+   ======================================== */
+
+.dsn-stations {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.dsn-station {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    text-align: center;
+}
+
+.dsn-station-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.dsn-station-location {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.dsn-station-status {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+.dsn-station-status.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--status-completed);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.dsn-station-status.standby {
+    background: rgba(107, 114, 128, 0.15);
+    color: var(--status-upcoming);
+    border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.dsn-link {
+    display: block;
+    margin-top: 12px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--accent-cyan);
+    text-decoration: none;
+}
+
+.dsn-link:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
    No Trajectory Message
    ======================================== */
 
