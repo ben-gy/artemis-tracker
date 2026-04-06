@@ -1,0 +1,986 @@
+/* ========================================
+   Artemis Mission Tracker - Styles
+   ======================================== */
+
+:root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-panel: #151c2c;
+    --bg-panel-header: #1a2235;
+    --border-color: #1e2d45;
+    --text-primary: #e8ecf1;
+    --text-secondary: #8896ab;
+    --text-muted: #556178;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #22d3ee;
+    --nasa-blue: #0b3d91;
+    --status-live: #f59e0b;
+    --status-live-glow: rgba(245, 158, 11, 0.3);
+    --status-completed: #10b981;
+    --status-upcoming: #6b7280;
+    --trajectory-past: #60a5fa;
+    --trajectory-future: rgba(96, 165, 250, 0.3);
+    --danger: #ef4444;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --transition: 0.2s ease;
+}
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ========================================
+   Header
+   ======================================== */
+
+#app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+#app-header h1 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+}
+
+.header-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.header-btn {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--font-mono);
+    transition: background var(--transition), color var(--transition);
+}
+
+.header-btn:hover {
+    background: var(--bg-panel-header);
+    color: var(--text-primary);
+}
+
+/* ========================================
+   Mission Tabs
+   ======================================== */
+
+#mission-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+#mission-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.mission-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition);
+    font-family: var(--font-sans);
+}
+
+.mission-tab:hover {
+    background: var(--bg-panel);
+    color: var(--text-primary);
+}
+
+.mission-tab.active {
+    background: var(--bg-panel);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.mission-tab .tab-status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.mission-tab .tab-status.completed {
+    background: var(--status-completed);
+}
+
+.mission-tab .tab-status.inProgress {
+    background: var(--status-live);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.mission-tab .tab-status.upcoming {
+    background: var(--status-upcoming);
+}
+
+.tab-live-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--status-live);
+    text-transform: uppercase;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--status-live-glow); }
+    50% { opacity: 0.5; box-shadow: 0 0 8px var(--status-live-glow); }
+}
+
+/* ========================================
+   3D Scene
+   ======================================== */
+
+#scene-container {
+    position: relative;
+    width: 100%;
+    height: 50vh;
+    min-height: 300px;
+    max-height: 600px;
+    background: #050810;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#three-canvas-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+#three-canvas-wrapper canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#scene-overlay {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+}
+
+#scene-mission-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+#scene-status-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+}
+
+#scene-status-badge.completed {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--status-completed);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+#scene-status-badge.inProgress {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--status-live);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    animation: pulse-glow-badge 2s ease-in-out infinite;
+}
+
+#scene-status-badge.upcoming {
+    background: rgba(107, 114, 128, 0.2);
+    color: var(--status-upcoming);
+    border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+@keyframes pulse-glow-badge {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+#scene-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    display: flex;
+    gap: 6px;
+}
+
+.scene-btn {
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all var(--transition);
+}
+
+.scene-btn:hover {
+    background: rgba(26, 34, 53, 0.95);
+    color: var(--text-primary);
+    border-color: var(--accent-blue);
+}
+
+/* ========================================
+   Panels
+   ======================================== */
+
+#panels-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--bg-panel-header);
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--transition);
+}
+
+.panel-header:hover {
+    background: #1f293d;
+}
+
+.panel-header h2 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+}
+
+.panel-toggle {
+    font-size: 10px;
+    color: var(--text-muted);
+    transition: transform var(--transition);
+}
+
+.panel.collapsed .panel-toggle {
+    transform: rotate(-90deg);
+}
+
+.panel-content {
+    padding: 18px;
+    transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+    max-height: 2000px;
+    opacity: 1;
+}
+
+.panel.collapsed .panel-content {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+/* ========================================
+   Telemetry Grid
+   ======================================== */
+
+.telemetry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.telemetry-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+}
+
+.telemetry-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.telemetry-value {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.telemetry-unit {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+.telemetry-bar {
+    margin-top: 8px;
+    height: 3px;
+    background: var(--bg-primary);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.telemetry-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent-cyan);
+    transition: width 0.5s ease;
+}
+
+.telemetry-source {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.telemetry-source-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--status-completed);
+    flex-shrink: 0;
+}
+
+.telemetry-source-dot.stale {
+    background: var(--status-live);
+}
+
+.telemetry-source-dot.error {
+    background: var(--danger);
+}
+
+/* ========================================
+   Timeline
+   ======================================== */
+
+.timeline-progress {
+    margin-bottom: 16px;
+}
+
+.timeline-progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.timeline-progress-bar {
+    height: 4px;
+    background: var(--bg-primary);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.timeline-progress-fill {
+    height: 100%;
+    background: var(--accent-blue);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+.timeline-list {
+    list-style: none;
+    position: relative;
+    padding-left: 24px;
+}
+
+.timeline-list::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--border-color);
+}
+
+.timeline-item {
+    position: relative;
+    padding: 8px 0 8px 16px;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -20px;
+    top: 12px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    background: var(--bg-panel);
+    z-index: 1;
+}
+
+.timeline-item.completed .timeline-dot {
+    background: var(--status-completed);
+    border-color: var(--status-completed);
+}
+
+.timeline-item.current .timeline-dot {
+    background: var(--status-live);
+    border-color: var(--status-live);
+    box-shadow: 0 0 8px var(--status-live-glow);
+}
+
+.timeline-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.timeline-item.upcoming .timeline-item-title {
+    color: var(--text-secondary);
+}
+
+.timeline-item-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.timeline-item-description {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.5;
+}
+
+/* ========================================
+   Crew
+   ======================================== */
+
+.crew-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.crew-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    text-align: center;
+}
+
+.crew-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--bg-panel-header);
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--text-muted);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+}
+
+.crew-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.crew-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.crew-role {
+    font-size: 12px;
+    color: var(--accent-cyan);
+    margin-bottom: 2px;
+}
+
+.crew-agency {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ========================================
+   Mission Details
+   ======================================== */
+
+.details-description {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.details-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.details-stat {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px;
+}
+
+.details-stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.details-stat-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.details-objectives {
+    margin-top: 16px;
+}
+
+.details-objectives h3 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.details-objectives ul {
+    list-style: none;
+    padding: 0;
+}
+
+.details-objectives li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 6px 0 6px 20px;
+    position: relative;
+    line-height: 1.5;
+}
+
+.details-objectives li::before {
+    content: '\25B8';
+    position: absolute;
+    left: 0;
+    color: var(--accent-blue);
+}
+
+/* ========================================
+   No Trajectory Message
+   ======================================== */
+
+.no-trajectory {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: var(--text-muted);
+    gap: 8px;
+}
+
+.no-trajectory-icon {
+    font-size: 48px;
+    opacity: 0.3;
+}
+
+.no-trajectory-text {
+    font-size: 14px;
+    max-width: 300px;
+    line-height: 1.5;
+}
+
+/* ========================================
+   Footer
+   ======================================== */
+
+#app-footer {
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+/* ========================================
+   Glossary Modal
+   ======================================== */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal[hidden] {
+    display: none;
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 540px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+#glossary-search {
+    margin: 12px 20px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: var(--font-sans);
+    outline: none;
+}
+
+#glossary-search:focus {
+    border-color: var(--accent-blue);
+}
+
+#glossary-list {
+    overflow-y: auto;
+    padding: 0 20px 20px;
+    flex: 1;
+}
+
+.glossary-entry {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.glossary-entry:last-child {
+    border-bottom: none;
+}
+
+.glossary-term {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    margin-bottom: 4px;
+}
+
+.glossary-abbr {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 8px;
+    font-weight: 400;
+}
+
+.glossary-def {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ========================================
+   Tooltip
+   ======================================== */
+
+.tooltip {
+    position: fixed;
+    z-index: 2000;
+    background: var(--bg-panel-header);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    max-width: 280px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+.tooltip[hidden] {
+    display: none;
+}
+
+.tooltip-term {
+    font-weight: 700;
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* Inline glossary terms */
+.glossary-link {
+    color: var(--accent-cyan);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent-cyan);
+    cursor: help;
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (max-width: 768px) {
+    #app-header {
+        padding: 10px 14px;
+    }
+
+    #app-header h1 {
+        font-size: 12px;
+        letter-spacing: 1.5px;
+    }
+
+    #mission-tabs {
+        padding: 6px 14px;
+    }
+
+    .mission-tab {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    #scene-container {
+        height: 40vh;
+        min-height: 250px;
+    }
+
+    #scene-controls {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .scene-btn {
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+
+    #panels-container {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .panel-content {
+        padding: 14px;
+    }
+
+    .telemetry-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .telemetry-value {
+        font-size: 18px;
+    }
+
+    .crew-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .details-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .telemetry-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .crew-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .details-stats {
+        grid-template-columns: 1fr;
+    }
+
+    #scene-mission-label {
+        font-size: 14px;
+    }
+}
+
+/* ========================================
+   Scrollbar
+   ======================================== */
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ========================================
+   Loading / Empty States
+   ======================================== */
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 13px;
+}

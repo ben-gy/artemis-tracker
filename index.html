@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artemis Mission Tracker</title>
+    <meta name="description" content="Track NASA's Artemis missions in real-time with 3D trajectory visualization">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header id="app-header">
+        <div class="header-left">
+            <h1>ARTEMIS TRACKER</h1>
+        </div>
+        <div class="header-right">
+            <button id="unit-toggle" class="header-btn" title="Toggle units">
+                <span id="unit-label">km</span>
+            </button>
+            <button id="glossary-btn" class="header-btn" title="Glossary">?</button>
+        </div>
+    </header>
+
+    <nav id="mission-tabs" role="tablist"></nav>
+
+    <main id="app-main">
+        <section id="scene-container">
+            <div id="three-canvas-wrapper"></div>
+            <div id="scene-overlay">
+                <span id="scene-mission-label"></span>
+                <span id="scene-status-badge"></span>
+            </div>
+            <div id="scene-controls">
+                <button id="focus-earth" class="scene-btn" title="Focus Earth">Earth</button>
+                <button id="focus-moon" class="scene-btn" title="Focus Moon">Moon</button>
+                <button id="focus-craft" class="scene-btn" title="Focus Spacecraft">Craft</button>
+                <button id="focus-reset" class="scene-btn" title="Reset View">Reset</button>
+            </div>
+        </section>
+
+        <section id="panels-container">
+            <div id="telemetry-panel" class="panel" data-panel="telemetry">
+                <div class="panel-header" role="button" tabindex="0">
+                    <h2>TELEMETRY</h2>
+                    <span class="panel-toggle">&#9660;</span>
+                </div>
+                <div class="panel-content" id="telemetry-content"></div>
+            </div>
+
+            <div id="timeline-panel" class="panel" data-panel="timeline">
+                <div class="panel-header" role="button" tabindex="0">
+                    <h2>MISSION TIMELINE</h2>
+                    <span class="panel-toggle">&#9660;</span>
+                </div>
+                <div class="panel-content" id="timeline-content"></div>
+            </div>
+
+            <div id="crew-panel" class="panel" data-panel="crew">
+                <div class="panel-header" role="button" tabindex="0">
+                    <h2>CREW</h2>
+                    <span class="panel-toggle">&#9660;</span>
+                </div>
+                <div class="panel-content" id="crew-content"></div>
+            </div>
+
+            <div id="details-panel" class="panel" data-panel="details">
+                <div class="panel-header" role="button" tabindex="0">
+                    <h2>MISSION DETAILS</h2>
+                    <span class="panel-toggle">&#9660;</span>
+                </div>
+                <div class="panel-content" id="details-content"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="app-footer">
+        <span id="data-attribution"></span>
+    </footer>
+
+    <!-- Glossary Modal -->
+    <div id="glossary-modal" class="modal" hidden>
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Space Glossary</h2>
+                <button class="modal-close" aria-label="Close">&times;</button>
+            </div>
+            <input type="search" id="glossary-search" placeholder="Search terms..." autocomplete="off">
+            <div id="glossary-list"></div>
+        </div>
+    </div>
+
+    <!-- Tooltip container -->
+    <div id="tooltip" class="tooltip" hidden></div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
