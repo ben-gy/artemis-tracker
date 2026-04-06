@@ -25,10 +25,10 @@ export async function getTelemetry(missionId, isLive = false) {
     if (isLive && !fetchInProgress) {
         // Only fetch every 30 seconds
         if (!lastFetch || (now.getTime() - lastFetch.getTime()) > 30000) {
+            lastFetch = now; // Set immediately to prevent re-entry
             try {
                 const liveData = await fetchAROW();
                 if (liveData) {
-                    lastFetch = now;
                     lastData = {
                         ...liveData,
                         dataSource: 'NASA AROW',
@@ -37,10 +37,9 @@ export async function getTelemetry(missionId, isLive = false) {
                     return lastData;
                 }
             } catch (e) {
-                console.warn('AROW fetch failed, using interpolation:', e.message);
+                // Silently fall through to interpolation
             }
         } else if (lastData && lastData.dataSource === 'NASA AROW') {
-            // Return cached live data if still fresh
             return lastData;
         }
     }
