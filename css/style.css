@@ -327,8 +327,23 @@ body {
     position: sticky;
     top: 60px;
     max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+}
+
+#panels-right .panel {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+#panels-right .panel-content {
     overflow-y: auto;
     scrollbar-width: thin;
+    flex: 1;
+    min-height: 0;
+    max-height: none;
 }
 
 .panel {
