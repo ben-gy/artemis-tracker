@@ -311,8 +311,24 @@ body {
     margin: 0 auto;
     padding: 16px 20px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 380px;
+    grid-template-rows: auto;
     gap: 12px;
+    align-items: start;
+}
+
+#panels-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#panels-right {
+    position: sticky;
+    top: 60px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    scrollbar-width: thin;
 }
 
 .panel {
@@ -322,9 +338,7 @@ body {
     overflow: hidden;
 }
 
-.panel.full-width {
-    grid-column: 1 / -1;
-}
+/* reserved */
 
 .panel-header {
     display: flex;
@@ -1371,6 +1385,12 @@ body {
         padding: 12px 14px;
         gap: 10px;
         grid-template-columns: 1fr;
+    }
+
+    #panels-right {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
     }
 
     .panel-content {
