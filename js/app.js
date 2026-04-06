@@ -101,7 +101,7 @@ function savePreferences() {
 
 function updateUnitButton() {
     const label = document.getElementById('unit-label');
-    if (label) label.textContent = useMetric ? 'km' : 'mi';
+    if (label) label.textContent = useMetric ? 'KM' : 'MI';
 }
 
 // ========================================
