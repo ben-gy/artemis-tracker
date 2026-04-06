@@ -175,11 +175,14 @@ export function renderTimeline(container, mission, viewDate) {
         `;
     }
 
-    const milestonesHTML = milestones.map(m => {
+    // Find the current/next milestone index
+    const nextIdx = milestones.findIndex(ms => ms.date && ms.date > now);
+    const completedCount = nextIdx === -1 ? milestones.length : nextIdx;
+
+    const milestonesHTML = milestones.map((m, idx) => {
         let status = 'upcoming';
         if (m.date && m.date <= now) status = 'completed';
-        const nextMilestone = milestones.find(ms => ms.date && ms.date > now);
-        if (nextMilestone && m.id === nextMilestone.id) status = 'current';
+        if (nextIdx >= 0 && idx === nextIdx) status = 'current';
         if (!m.date) status = 'upcoming';
 
         const dateStr = m.date ? formatDateTime(m.date) : 'TBD';
@@ -198,11 +201,11 @@ export function renderTimeline(container, mission, viewDate) {
             }
         }
 
-        // Add data-met attribute for click-to-jump
         const metAttr = m.metHours != null ? `data-met-hours="${m.metHours}"` : '';
+        const itemId = status === 'current' ? 'id="timeline-current"' : '';
 
         return `
-            <li class="timeline-item ${status}" ${metAttr} style="cursor:pointer" title="Click to jump to this event">
+            <li class="timeline-item ${status}" ${metAttr} ${itemId} style="cursor:pointer" title="Click to jump to this event">
                 <div class="timeline-dot"></div>
                 <div class="timeline-item-title">${m.title}</div>
                 <div class="timeline-item-meta">${dateStr}${metStr ? ' \u00B7 ' + metStr : ''}</div>
@@ -211,7 +214,107 @@ export function renderTimeline(container, mission, viewDate) {
         `;
     }).join('');
 
-    container.innerHTML = `${progressHTML}<ul class="timeline-list">${milestonesHTML}</ul>`;
+    // Wrap completed milestones in a collapsible group
+    let completedGroupHTML = '';
+    if (completedCount > 0) {
+        const completedItems = milestones.slice(0, completedCount).map((m, idx) => {
+            const dateStr = m.date ? formatDateTime(m.date) : 'TBD';
+            const metStr = m.metHours != null ? `MET ${m.metHours >= 0 ? '+' : ''}${m.metHours}h` : '';
+            const metAttr = m.metHours != null ? `data-met-hours="${m.metHours}"` : '';
+            let desc = m.description || '';
+            if (m.glossaryTerms) {
+                for (const term of m.glossaryTerms) {
+                    const entry = lookupTerm(term);
+                    if (entry) {
+                        desc = desc.replace(
+                            new RegExp(`\\b${escapeRegex(entry.abbr || term)}\\b`, 'g'),
+                            `<span class="glossary-link" data-term="${term}">${entry.abbr || term}</span>`
+                        );
+                    }
+                }
+            }
+            return `
+                <li class="timeline-item completed" ${metAttr} style="cursor:pointer" title="Click to jump to this event">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-item-title">${m.title}</div>
+                    <div class="timeline-item-meta">${dateStr}${metStr ? ' \u00B7 ' + metStr : ''}</div>
+                    ${desc ? `<div class="timeline-item-description">${desc}</div>` : ''}
+                </li>
+            `;
+        }).join('');
+
+        completedGroupHTML = `
+            <div class="timeline-completed-group" id="timeline-completed-group">
+                <button class="timeline-completed-toggle" id="timeline-completed-toggle" type="button">
+                    <span class="timeline-completed-icon">&#9654;</span>
+                    ${completedCount} completed event${completedCount !== 1 ? 's' : ''}
+                </button>
+                <ul class="timeline-list timeline-completed-list" id="timeline-completed-list" hidden>
+                    ${completedItems}
+                </ul>
+            </div>
+        `;
+    }
+
+    // Active + upcoming milestones
+    const activeItems = milestones.slice(completedCount).map((m, idx) => {
+        let status = 'upcoming';
+        if (idx === 0 && nextIdx >= 0) status = 'current';
+        if (!m.date) status = 'upcoming';
+
+        const dateStr = m.date ? formatDateTime(m.date) : 'TBD';
+        const metStr = m.metHours != null ? `MET ${m.metHours >= 0 ? '+' : ''}${m.metHours}h` : '';
+        const metAttr = m.metHours != null ? `data-met-hours="${m.metHours}"` : '';
+        const itemId = status === 'current' ? 'id="timeline-current"' : '';
+
+        let desc = m.description || '';
+        if (m.glossaryTerms) {
+            for (const term of m.glossaryTerms) {
+                const entry = lookupTerm(term);
+                if (entry) {
+                    desc = desc.replace(
+                        new RegExp(`\\b${escapeRegex(entry.abbr || term)}\\b`, 'g'),
+                        `<span class="glossary-link" data-term="${term}">${entry.abbr || term}</span>`
+                    );
+                }
+            }
+        }
+
+        return `
+            <li class="timeline-item ${status}" ${metAttr} ${itemId} style="cursor:pointer" title="Click to jump to this event">
+                <div class="timeline-dot"></div>
+                <div class="timeline-item-title">${m.title}</div>
+                <div class="timeline-item-meta">${dateStr}${metStr ? ' \u00B7 ' + metStr : ''}</div>
+                ${desc ? `<div class="timeline-item-description">${desc}</div>` : ''}
+            </li>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        ${progressHTML}
+        ${completedGroupHTML}
+        <ul class="timeline-list">${activeItems}</ul>
+    `;
+
+    // Wire up the completed toggle
+    const toggleBtn = container.querySelector('#timeline-completed-toggle');
+    const completedList = container.querySelector('#timeline-completed-list');
+    if (toggleBtn && completedList) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = completedList.hidden;
+            completedList.hidden = !isHidden;
+            toggleBtn.querySelector('.timeline-completed-icon').textContent = isHidden ? '\u25BC' : '\u25B6';
+        });
+    }
+
+    // Auto-scroll to current milestone
+    requestAnimationFrame(() => {
+        const currentEl = container.querySelector('#timeline-current');
+        if (currentEl) {
+            currentEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+    });
 }
 
 // ========================================

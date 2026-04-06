@@ -571,6 +571,50 @@ body {
     line-height: 1.5;
 }
 
+/* Completed milestones group */
+.timeline-completed-group {
+    margin-bottom: 12px;
+}
+
+.timeline-completed-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    width: 100%;
+    transition: background var(--transition), color var(--transition);
+}
+
+.timeline-completed-toggle:hover {
+    background: var(--bg-panel-header);
+    color: var(--text-secondary);
+}
+
+.timeline-completed-icon {
+    font-size: 8px;
+    transition: transform 0.2s ease;
+}
+
+.timeline-completed-list {
+    margin-top: 8px;
+}
+
+.timeline-completed-list .timeline-item .timeline-item-title {
+    color: var(--text-muted);
+}
+
+.timeline-completed-list .timeline-item .timeline-item-description {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
 /* ========================================
    Crew
    ======================================== */
