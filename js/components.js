@@ -393,7 +393,7 @@ export function renderVideoPanel(container, mission) {
 
     container.innerHTML = `
         <div class="video-embed-wrapper">
-            <iframe src="https://www.youtube.com/embed/m3kR2KK8TEs?autoplay=0"
+            <iframe src="https://www.youtube.com/embed/z-j1uxBmis0?autoplay=0"
                     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen loading="lazy"
                     title="NASA TV Live Stream"></iframe>
