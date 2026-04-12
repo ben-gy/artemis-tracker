@@ -143,7 +143,14 @@ function selectMission(missionId) {
     // Reset time state
     isLiveMode = mission.status === MISSION_STATUS.IN_PROGRESS;
     isPlaying = false;
-    viewDate = isLiveMode ? new Date() : (mission.launchDate || new Date());
+    if (isLiveMode) {
+        viewDate = new Date();
+    } else if (mission.status === MISSION_STATUS.COMPLETED) {
+        // Use current date so all milestones show as completed; slider clamps to 100%
+        viewDate = new Date();
+    } else {
+        viewDate = mission.launchDate || new Date();
+    }
 
     updateTabSelection();
     updateSceneOverlay(mission);
