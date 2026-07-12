@@ -490,7 +490,7 @@ function updateFooter(mission) {
         `<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a>`
     ).join(' \u00B7 ') + ' | Trajectory data is approximate';
 
-    creditEl.innerHTML = 'Built by <a href="https://benrichardson.dev/" target="_blank" rel="noopener" class="chicago-font">benrichardson.dev</a> · <a href="https://hub.benrichardson.dev" target="_blank" rel="noopener">more tools &amp; sites</a>';
+    creditEl.innerHTML = 'Built by <a href="https://benrichardson.dev/" target="_blank" rel="noopener" class="chicago-font">benrichardson.dev</a> · <a href="https://sites.benrichardson.dev" target="_blank" rel="noopener">more tools &amp; sites</a>';
 }
 
 // ========================================
