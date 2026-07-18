@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://artemistracker.benrichardson.dev/sitemap.xml
